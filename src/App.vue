@@ -8,45 +8,50 @@ const roomSizes = [
   { id: 4, name: '京間6畳(287×382)'  , width: 287, depth: 382 },
 ]
 
-const room_width = ref('261')
-const room_depth = ref('352')
+const roomWidth = ref('261') // 横幅の初期値を設定 refで追跡可能に
+const roomDepth = ref('352') // 奥行の初期値を設定 refで追跡可能に
 
 function selected(event) {
   const selectedId = Number(event.target.value)   // 文字列で届くので数値に変換
-  const found = roomSizes.find(roomName)
+  // 配列の中身を1個ずつ取り出して仮に r と呼ぶ
+  const found = roomSizes.find(r => r.id === selectedId)
   if (!found) return
-  room_width.value = roomName
-  room_depth.value = roomName
+  roomWidth.value = found.width
+  roomDepth.value = found.depth
+}
+
+const selectedRoomId = ref(1)   // 今選ばれている規格のid。初期値は江戸間
+
+function reset(){
+  roomWidth.value = '261'
+  roomDepth.value = '352'
+  selectedRoomId.value = 1
 }
 
 </script>
 
 <template>
   <div class="header">
-    <h1>6畳1Kレイアウトシュミレーター MADORI</h1>
-    <div class "room_layout">
+   <h1>6畳1Kレイアウトシュミレーター MADORI</h1>
+    <div class="room_layout">
       <p>畳の規格</p>
-      <div class = "room_select">
-        <select @change="room"> 
-          <option v-for="roomName in roomList"
-                  :key="roomName">
-           {{roomName}}
+      <div class="room_select">
+        <select v-model="selectedRoomId" @change="selected">
+          <option v-for="r in roomSizes" :key="r.id" :value="r.id">
+            {{ r.name }}
           </option>
         </select>
-      </div>  
-
-
-      <p>幅</p> <input type = "text" v-model = "room_width">
-      <p>奥行</p> <input type = "text" v-model = "room_depth">
-      <button>リセット</button>
+      </div>
+      <p>幅</p> <input type="text" v-model="roomWidth">
+      <p>奥行</p> <input type="text" v-model="roomDepth">
+      <button @click="reset">リセット</button>
     </div>
-    <br></br>
+    <p>単位:cm /ドラッグで移動・タップで選択</p> 
   </div>
 </template>
 
 <style>
 body { font-family: sans-serif; }
-
 .room_layout {
  display:flex;    /* 中に入っている要素（子要素）を横並びにする */
  align-items: center; /* 縦方向の中央揃え */

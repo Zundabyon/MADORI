@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 // ヘッダー部分
 // 畳の規格一覧（id・名前・幅・奥行をひとまとめに持つ）
@@ -63,6 +63,14 @@ const catalog = [
 
 const items = ref([])   // 配置済みの家具（増減する＝状態なのでref）
 
+
+// 1cmあたり何pxで描画するかを計算（部屋が画面に収まるように自動調整）
+const SCALE = computed(() =>
+  Math.min(640 / Number(roomWidth.value), 560 / Number(roomDepth.value))
+)
+const px = (cm) => cm * SCALE.value   // cm→pxに変換する小さな関数
+
+
 function addItem(c) {
   const newItem = {
     id: crypto.randomUUID(),   // ← これはこのまま使ってくださいまし（一意なIDの発行）
@@ -98,13 +106,22 @@ function addItem(c) {
     <p>配置数: {{ items.length }}</p>
   </div>
 
-
-  <div class ="layout">
-    <aside class ="palette">
+  <div class="layout">
+    <aside class="palette">
       <button v-for="c in catalog" :key="c.name" @click="addItem(c)">
-        {{ c.name }} <small> {{ c.width }} x {{ c.depth }} </small>
+        {{ c.name }} <small>{{ c.width }} x {{ c.depth }}</small>
       </button>
-    </aside>  
+    </aside>
+
+    <div class="room" :style="{ width: px(Number(roomWidth)) + 'px', height: px(Number(roomDepth)) + 'px' }">
+      <div v-for="it in items" :key="it.id"
+           class="furniture"
+           :class="'genre-' + it.genre"
+           :style="{ left: px(it.x) + 'px', top: px(it.y) + 'px',
+                     width: px(it.width) + 'px', height: px(it.depth) + 'px' }">
+        {{ it.name }}
+      </div>
+    </div>
   </div>
 </template>
 
